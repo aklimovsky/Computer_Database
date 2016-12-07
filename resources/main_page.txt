@@ -1,0 +1,168 @@
+*** Settings ***
+Library           Selenium2Library
+Resource          utils.txt
+Resource          edit_computer_page.txt
+Resource          add_a_computer_page.txt
+
+*** Variable ***
+${XPATH_FILTER_INPUT}    //input[@id='searchbox']
+${XPATH_FILTER_BUTTON}    //input[@id='searchsubmit']
+${XPATH_NO_COMPUTERS_FOUND}    //h1[text()='No computers found']
+${XPATH_ONE_COMPUTER_FOUND}    //h1[text()='One computer found']
+${XPATH_DELETED_MESSAGE}    //div[./text()[contains(.,'Computer has been deleted')]]
+${XPATH_CREATED_MESSAGE}    //div[./text()[contains(.,'has been created')]]
+${XPATH_UPDATED_MESSAGE}    //div[./text()[contains(.,'has been updated')]]
+${XPATH_ADD_A_NEW_COMPUTER_BUTTON}    //a[text()='Add a new computer']
+${XPATH_COMPUTERS_TABLE}    //table[contains(@class,'computers')]
+${XPATH_COMPUTERS}    ${XPATH_COMPUTERS_TABLE}/tbody/tr
+
+*** Keyword ***
+Check That Computer Name Is Absent
+    [Arguments]    ${name}
+    [Documentation]    Check that a computer with a certain name is absent in the table.
+    ...
+    ...    *Arguments*
+    ...
+    ...    _name_ - an exact name of the computer.
+    ...
+    ...    *Precondition*
+    ...
+    ...    Computers table is displayed.
+    ...
+    ...    *Example*
+    ...
+    ...    Check That Computer Name Is Absent | IBM PC
+    : FOR    ${item}    IN RANGE    1    100
+    \    Filter    ${name}
+    \    ${found}=    Run Keyword And Return Status    Wait Until Page Contains Element    ${XPATH_NO_COMPUTERS_FOUND}    ${FILTER_TIMEOUT}
+    \    Run Keyword If    '${found}' == 'True'    Exit For Loop
+    \    Delete First Computer
+
+Filter
+    [Arguments]    ${name}
+    [Documentation]    Filter the list for a certain computer name.
+    ...
+    ...    *Arguments*
+    ...
+    ...    _name_ - an exact name of the computer.
+    ...
+    ...    *Precondition*
+    ...
+    ...    Computers table is displayed.
+    ...
+    ...    *Example*
+    ...
+    ...    Filter | IBM PC
+    Robust Input Text    ${XPATH_FILTER_INPUT}    ${name}
+    Robust Click    ${XPATH_FILTER_BUTTON}
+
+Delete First Computer
+    [Documentation]    Delete the first computer in the current table view.
+    ...
+    ...    *Precondition*
+    ...
+    ...    Computers table is displayed.
+    Robust Click    ${XPATH_COMPUTERS}[1]/td[1]/a
+    Robust Click    ${XPATH_DELETE_THIS_COMPUTER_BUTTON}
+    Wait Until Page Contains Element    ${XPATH_DELETED_MESSAGE}
+
+Go To Add A Computer Page
+    [Documentation]    Press Add a new computer button and wait until the page is loaded.
+    Robust Click    ${XPATH_ADD_A_NEW_COMPUTER_BUTTON}
+    Wait Until Page Contains Element    ${XPATH_ADD_A_COMPUTER_HEADING}
+
+Add A Computer
+    [Arguments]    ${name}    ${introduced}=${EMPTY}    ${discontinued}=${EMPTY}    ${company}=${EMPTY}
+    [Documentation]    Press Add a new computer button. Fill all the needed fields and press Create this computer button.
+    ...
+    ...    *Arguments*
+    ...
+    ...    _name_ - an exact name of the computer.
+    ...
+    ...    _introduced_ - introduced date. Example: 2016-12-04. The field is left as is the value is EMPTY.
+    ...
+    ...    _discontinued_ - discontinued date. Example: 2016-12-04. The field is left as is the value is EMPTY.
+    ...
+    ...    _company_ - company name. Example: Apple Inc. The field is left as is the value is EMPTY.
+    ...
+    ...    *Precondition*
+    ...
+    ...    Computers table is displayed.
+    ...
+    ...    *Example*
+    ...
+    ...    Check First Computer Fields | AAK | 04 Dec 2016 | ${EMPTY} | Apple Inc.
+    Go To Add A Computer Page
+    Fill Computer Name Field - Add    ${name}
+    Fill Introduced Date Field - Add    ${introduced}
+    Fill Discontinued Date Field - Add    ${discontinued}
+    Run Keyword If    '${company}' != '${EMPTY}'    Select Company - Add    ${company}
+    Robust Click    ${XPATH_CREATE_THIS_COMPUTER_BUTTON}
+    Wait Until Page Contains Element    ${XPATH_CREATED_MESSAGE}
+
+Check First Computer Fields
+    [Arguments]    ${name}    ${introduced}    ${discontinued}    ${company}
+    [Documentation]    Check that the fields of the first computer in the list have certain values.
+    ...
+    ...    *Arguments*
+    ...
+    ...    _name_ - an exact name of the computer.
+    ...
+    ...    _introduced_ - introduced date. Example: 04 Dec 2016. Can be EMPTY.
+    ...
+    ...    _discontinued_ - discontinued date. Example: 04 Dec 2016. Can be EMPTY.
+    ...
+    ...    _company_ - company name. Example: Apple Inc. Can be EMPTY.
+    ...
+    ...    *Precondition*
+    ...
+    ...    Computers table is displayed.
+    ...
+    ...    *Example*
+    ...
+    ...    Check First Computer Fields | AAK | 04 Dec 2016 | ${EMPTY} | Apple Inc.
+    ${actual_name}=    Get Text    ${XPATH_COMPUTERS}[1]/td[1]/a
+    Should Be Equal    '${actual_name}'    '${name}'    msg=First computer's name is '${actual_name}' instead of '${name}'    values=False
+    ${actual_introduced}=    Get Text    ${XPATH_COMPUTERS}[1]/td[2]
+    Run Keyword If    '${introduced}' == '${EMPTY}'    Should Be Equal    '${actual_introduced}'    '-'    msg=First computer's introduced date is '${actual_introduced}' instead of empty    values=False
+    ...    ELSE    Should Contain    '${actual_introduced}'    '${introduced}'    msg=First computer's introduced date is '${actual_introduced}' instead of '${introduced}'    values=False
+    ${actual_discontinued}=    Get Text    ${XPATH_COMPUTERS}[1]/td[3]
+    Run Keyword If    '${discontinued}' == '${EMPTY}'    Should Be Equal    '${actual_discontinued}'    '-'    msg=First computer's discontinued date is '${actual_discontinued}' instead of empty    values=False
+    ...    ELSE    Should Contain    '${actual_discontinued}'    '${discontinued}'    msg=First computer's discontinued date is '${actual_discontinued}' instead of '${discontinued}'    values=False
+    ${actual_company}=    Get Text    ${XPATH_COMPUTERS}[1]/td[4]
+    Run Keyword If    '${company}' == '${EMPTY}'    Should Be Equal    '${actual_company}'    '-'    msg=First computer's company is '${actual_company}' instead of empty    values=False
+    ...    ELSE    Should Contain    '${actual_company}'    '${company}'    msg=First computer's company is '${actual_company}' instead of '${company}'    values=False
+
+Go To Edit Page
+    [Documentation]    Click on the first computer name in the list and wait until the page is loaded.
+    Robust Click    ${XPATH_COMPUTERS}[1]/td[1]/a
+    Wait Until Page Contains Element    ${XPATH_EDIT_COMPUTER_HEADING}
+
+Edit A First Computer
+    [Arguments]    ${name}=${EMPTY}    ${introduced}=${EMPTY}    ${discontinued}=${EMPTY}    ${company}=${EMPTY}
+    [Documentation]    Edit the first computer in the list.
+    ...
+    ...    *Arguments*
+    ...
+    ...    _name_ - an new name of the computer. Can be EMPTY
+    ...
+    ...    _introduced_ - new introduced date. Example: 2016-12-04. Can be EMPTY.
+    ...
+    ...    _discontinued_ - new discontinued date. Example: 2016-12-04. Can be EMPTY.
+    ...
+    ...    _company_ - company name. Example: Apple Inc. Can be EMPTY.
+    ...
+    ...    *Precondition*
+    ...
+    ...    Computers table is displayed. The computer with exact name \${name} should be displayed on the page.
+    ...
+    ...    *Example*
+    ...
+    ...    Edit A First Computer | ${introduced}=2015-03-02
+    Go To Edit Page
+    Fill Computer Name Field - Edit    ${name}
+    Fill Introduced Date Field - Edit    ${introduced}
+    Fill Discontinued Date Field - Edit    ${discontinued}
+    Run Keyword If    '${company}' != '${EMPTY}'    Select Company - Edit    ${company}
+    Robust Click    ${XPATH_SAVE_THIS_COMPUTER_BUTTON}
+    Wait Until Page Contains Element    ${XPATH_UPDATED_MESSAGE}

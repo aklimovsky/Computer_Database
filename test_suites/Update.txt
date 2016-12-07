@@ -1,0 +1,72 @@
+*** Settings ***
+Documentation     The goal of this suite is to check functionality of updating the existing computer.
+Test Setup        Open Computer Database
+Test Teardown     Close Browser
+Force Tags        Regression
+Library           Selenium2Library
+Resource          ../resources/utils.txt
+Resource          ../resources/main_page.txt
+Resource          ../resources/edit_computer_page.txt
+
+*** Variable ***
+${DEFAULT_NAME}    AAK
+${DEFAULT_INTRODUCED_DATE}    2016-12-04
+${DEFAULT_DISCONTINUED_DATE}    2016-12-04
+${DEFAULT_COMPANY}    Apple Inc.
+${DEFAULT_INTRODUCED_DATE_2}    04 Dec 2016
+${DEFAULT_DISCONTINUED_DATE_2}    04 Dec 2016
+${NEW_NAME}       NEW_NAME
+${NEW_INTRODUCED_DATE}    2013-10-12
+${NEW_DISCONTINUED_DATE}    2014-10-12
+${NEW_COMPANY}    IBM
+${NEW_INTRODUCED_DATE_2}    12 Oct 2013
+${NEW_DISCONTINUED_DATE_2}    12 Oct 2014
+
+*** Test Cases ***
+Updating of all fields
+    [Documentation]    Edit an existing computer with all fields being filled.
+    ...    Input new values for all the fields and save.
+    ...    Check that the computer is correctly updated.
+    Check That Computer Name Is Absent    ${DEFAULT_NAME}
+    Check That Computer Name Is Absent    ${NEW_NAME}
+    Add A Computer    ${DEFAULT_NAME}    ${DEFAULT_INTRODUCED_DATE}    ${DEFAULT_DISCONTINUED_DATE}    ${DEFAULT_COMPANY}
+    Filter    ${DEFAULT_NAME}
+    Edit A First Computer    ${NEW_NAME}    ${NEW_INTRODUCED_DATE}    ${NEW_DISCONTINUED_DATE}    ${NEW_COMPANY}
+    Filter    ${NEW_NAME}
+    Wait Until Page Contains Element    ${XPATH_ONE_COMPUTER_FOUND}    ${FILTER_TIMEOUT}
+    Check First Computer Fields    ${NEW_NAME}    ${NEW_INTRODUCED_DATE_2}    ${NEW_DISCONTINUED_DATE_2}    ${NEW_COMPANY}
+    Filter    ${DEFAULT_NAME}
+    Wait Until Page Contains Element    ${XPATH_NO_COMPUTERS_FOUND}    ${FILTER_TIMEOUT}
+
+Canceling the update
+    [Documentation]    Edit an existing computer with all fields being filled.
+    ...    Input new values for all the fields and press cancel.
+    ...    Check that initial computer is present and computer with new values is absent in the list.
+    Check That Computer Name Is Absent    ${DEFAULT_NAME}
+    Check That Computer Name Is Absent    ${NEW_NAME}
+    Add A Computer    ${DEFAULT_NAME}    ${DEFAULT_INTRODUCED_DATE}    ${DEFAULT_DISCONTINUED_DATE}    ${DEFAULT_COMPANY}
+    Filter    ${DEFAULT_NAME}
+    Go To Edit Page
+    Fill Computer Name Field - Edit    ${NEW_NAME}
+    Fill Introduced Date Field - Edit    ${NEW_INTRODUCED_DATE}
+    Fill Discontinued Date Field - Edit    ${NEW_DISCONTINUED_DATE}
+    Select Company - Edit    ${NEW_COMPANY}
+    Robust Click    ${XPATH_EDIT_CANCEL_BUTTON}
+    Filter    ${DEFAULT_NAME}
+    Wait Until Page Contains Element    ${XPATH_ONE_COMPUTER_FOUND}    ${FILTER_TIMEOUT}
+    Check First Computer Fields    ${DEFAULT_NAME}    ${DEFAULT_INTRODUCED_DATE_2}    ${DEFAULT_DISCONTINUED_DATE_2}    ${DEFAULT_COMPANY}
+    Filter    ${NEW_NAME}
+    Wait Until Page Contains Element    ${XPATH_NO_COMPUTERS_FOUND}    ${FILTER_TIMEOUT}
+
+Deleting the computer name
+    [Documentation]    Edit an existing computer with all fields being filled.
+    ...    Input new values for all the fields and save.
+    ...    Check that the computer is correctly updated.
+    Check That Computer Name Is Absent    ${DEFAULT_NAME}
+    Add A Computer    ${DEFAULT_NAME}    ${DEFAULT_INTRODUCED_DATE}    ${DEFAULT_DISCONTINUED_DATE}    ${DEFAULT_COMPANY}
+    Filter    ${DEFAULT_NAME}
+    Go To Edit Page
+    Fill Computer Name Field - Edit    ${EMPTY}
+    Robust Click    ${XPATH_SAVE_THIS_COMPUTER_BUTTON}
+    Wait Until Page Contains Element    ${XPATH_EDIT_COMPUTER_HEADING}
+    Wait Until Page Contains Element    ${XPATH_ADD_COMPUTER_NAME_ERROR}

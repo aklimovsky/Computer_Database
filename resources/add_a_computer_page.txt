@@ -1,0 +1,88 @@
+*** Setting ***
+Library           Selenium2Library
+Resource          utils.txt
+
+*** Variable ***
+${XPATH_ADD_A_COMPUTER_HEADING}    //h1[text()='Add a computer']
+${XPATH_ADD_COMPUTER_NAME_INPUT}    //input[@id='name']
+${XPATH_ADD_COMPUTER_NAME_LABEL}    ${XPATH_ADD_COMPUTER_NAME_INPUT}/../span[text()='Required']
+${XPATH_ADD_COMPUTER_NAME_ERROR}    ${XPATH_ADD_COMPUTER_NAME_INPUT}/ancestor::div[contains(@class,'error')]
+${XPATH_ADD_INTRODUCED_DATE_INPUT}    //input[@id='introduced']
+${XPATH_ADD_INTRODUCED_DATE_LABEL}    ${XPATH_ADD_INTRODUCED_DATE_INPUT}/../span[text()="Date ('yyyy-MM-dd')"]
+${XPATH_ADD_INTRODUCED_DATE_ERROR}    ${XPATH_ADD_INTRODUCED_DATE_INPUT}/ancestor::div[contains(@class,'error')]
+${XPATH_ADD_DISCONTINUED_DATE_INPUT}    //input[@id='discontinued']
+${XPATH_ADD_DISCONTINUED_DATE_LABEL}    ${XPATH_ADD_DISCONTINUED_DATE_INPUT}/../span[text()="Date ('yyyy-MM-dd')"]
+${XPATH_ADD_DISCONTINUED_DATE_ERROR}    ${XPATH_ADD_DISCONTINUED_DATE_INPUT}/ancestor::div[contains(@class,'error')]
+${XPATH_ADD_COMPANY_SELECT}    //select[@id='company']
+#
+${XPATH_CREATE_THIS_COMPUTER_BUTTON}    //input[@value='Create this computer']
+${XPATH_ADD_CANCEL_BUTTON}    //a[text()='Cancel']
+
+*** Keyword ***
+Fill Computer Name Field - Add
+    [Arguments]    ${name}
+    [Documentation]    Fill the Computer name field with a certain value.
+    ...
+    ...    *Arguments*
+    ...
+    ...    _name_ - name of the computer to add.
+    ...
+    ...    *Precondition*
+    ...
+    ...    Add a computer page is displayed.
+    ...
+    ...    *Example*
+    ...
+    ...    Fill The Computer Name Field - Add | IBM PC
+    Robust Input Text    ${XPATH_ADD_COMPUTER_NAME_INPUT}    ${name}
+
+Fill Introduced Date Field - Add
+    [Arguments]    ${date}
+    [Documentation]    Fill the Introduced date field with a certain value.
+    ...
+    ...    *Arguments*
+    ...
+    ...    _date_ - a date to fill the field with.
+    ...
+    ...    *Precondition*
+    ...
+    ...    Add a computer page is displayed.
+    ...
+    ...    *Example*
+    ...
+    ...    Fill Introduced Date Field - Add | 2016-12-04
+    Robust Input Text    ${XPATH_ADD_INTRODUCED_DATE_INPUT}    ${date}
+
+Fill Discontinued Date Field - Add
+    [Arguments]    ${date}
+    [Documentation]    Fill the Discontinued date field with a certain value.
+    ...
+    ...    *Arguments*
+    ...
+    ...    _date_ - a date to fill the field with.
+    ...
+    ...    *Precondition*
+    ...
+    ...    Add a computer page is displayed.
+    ...
+    ...    *Example*
+    ...
+    ...    Fill Discontinued Date Field - Add | 2016-12-04
+    Robust Input Text    ${XPATH_ADD_DISCONTINUED_DATE_INPUT}    ${date}
+
+Select Company - Add
+    [Arguments]    ${company}
+    [Documentation]    Select a certain value in the Company selector.
+    ...
+    ...    *Arguments*
+    ...
+    ...    _company_ - line to select.
+    ...
+    ...    *Precondition*
+    ...
+    ...    Add a computer page is displayed.
+    ...
+    ...    *Example*
+    ...
+    ...    Select Company - Add | Apple Inc.
+    Select From List By Label    ${XPATH_ADD_COMPANY_SELECT}    ${company}

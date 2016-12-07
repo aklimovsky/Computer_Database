@@ -1,0 +1,84 @@
+*** Settings ***
+Library           Selenium2Library
+Resource          utils.txt
+
+*** Variable ***
+${XPATH_EDIT_COMPUTER_HEADING}    //h1[text()='Edit computer']
+${XPATH_DELETE_THIS_COMPUTER_BUTTON}    //input[@value='Delete this computer']
+#
+${XPATH_EDIT_COMPUTER_NAME_INPUT}    //input[@id='name']
+${XPATH_EDIT_INTRODUCED_DATE_INPUT}    //input[@id='introduced']
+${XPATH_EDIT_DISCONTINUED_DATE_INPUT}    //input[@id='discontinued']
+${XPATH_EDIT_COMPANY_SELECT}    //select[@id='company']
+#
+${XPATH_SAVE_THIS_COMPUTER_BUTTON}    //input[@value='Save this computer']
+${XPATH_EDIT_CANCEL_BUTTON}    //a[text()='Cancel']
+
+*** Keywords ***
+Fill Computer Name Field - Edit
+    [Arguments]    ${name}
+    [Documentation]    Fill the Computer name field with a certain value.
+    ...
+    ...    *Arguments*
+    ...
+    ...    _name_ - name of the computer to add.
+    ...
+    ...    *Precondition*
+    ...
+    ...    Edit computer page is displayed.
+    ...
+    ...    *Example*
+    ...
+    ...    Fill The Computer Name Field - Edit | IBM PC
+    Robust Input Text    ${XPATH_EDIT_COMPUTER_NAME_INPUT}    ${name}
+
+Fill Introduced Date Field - Edit
+    [Arguments]    ${date}
+    [Documentation]    Fill the Introduced date field with a certain value.
+    ...
+    ...    *Arguments*
+    ...
+    ...    _date_ - a date to fill the field with.
+    ...
+    ...    *Precondition*
+    ...
+    ...    Edit computer page is displayed.
+    ...
+    ...    *Example*
+    ...
+    ...    Fill Introduced Date Field - Edit | 2016-12-04
+    Robust Input Text    ${XPATH_EDIT_INTRODUCED_DATE_INPUT}    ${date}
+
+Fill Discontinued Date Field - Edit
+    [Arguments]    ${date}
+    [Documentation]    Fill the Discontinued date field with a certain value.
+    ...
+    ...    *Arguments*
+    ...
+    ...    _date_ - a date to fill the field with.
+    ...
+    ...    *Precondition*
+    ...
+    ...    Edit computer page is displayed.
+    ...
+    ...    *Example*
+    ...
+    ...    Fill Discontinued Date Field - Edit | 2016-12-04
+    Robust Input Text    ${XPATH_EDIT_DISCONTINUED_DATE_INPUT}    ${date}
+
+Select Company - Edit
+    [Arguments]    ${company}
+    [Documentation]    Select a certain value in the Company selector.
+    ...
+    ...    *Arguments*
+    ...
+    ...    _company_ - line to select.
+    ...
+    ...    *Precondition*
+    ...
+    ...    Edit computer page is displayed.
+    ...
+    ...    *Example*
+    ...
+    ...    Select Company - Edit | Apple Inc.
+    Select From List By Label    ${XPATH_EDIT_COMPANY_SELECT}    ${company}

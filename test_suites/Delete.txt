@@ -1,0 +1,29 @@
+*** Settings ***
+Documentation     The goal of this suite is to check functionality of deleting a computer.
+Test Setup        Open Computer Database
+Test Teardown     Close Browser
+Force Tags        Regression
+Library           Selenium2Library
+Resource          ../resources/utils.txt
+Resource          ../resources/main_page.txt
+
+*** Variable ***
+${DEFAULT_NAME}    AAK
+${DEFAULT_INTRODUCED_DATE}    2016-12-04
+${DEFAULT_DISCONTINUED_DATE}    2016-12-04
+${DEFAULT_COMPANY}    Apple Inc.
+${DEFAULT_INTRODUCED_DATE_2}    04 Dec 2016
+${DEFAULT_DISCONTINUED_DATE_2}    04 Dec 2016
+
+*** Test Cases ***
+Deleting the computer
+    [Documentation]    Add a computer with all fields being filled.
+    ...    Edit this computer and press delete button.
+    ...    Check that computer is absent in the list.
+    Check That Computer Name Is Absent    ${DEFAULT_NAME}
+    Add A Computer    ${DEFAULT_NAME}    ${DEFAULT_INTRODUCED_DATE}    ${DEFAULT_DISCONTINUED_DATE}    ${DEFAULT_COMPANY}
+    Filter    ${DEFAULT_NAME}
+    Go To Edit Page
+    Robust Click    ${XPATH_DELETE_THIS_COMPUTER_BUTTON}
+    Filter    ${DEFAULT_NAME}
+    Wait Until Page Contains Element    ${XPATH_NO_COMPUTERS_FOUND}    ${FILTER_TIMEOUT}

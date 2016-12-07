@@ -1,0 +1,77 @@
+*** Setting ***
+Library           Selenium2Library
+Resource          main_page.txt
+
+*** Variable ***
+${URL}            http://computer-database.herokuapp.com/computers
+${BROWSER}        CHROME
+${FILTER_TIMEOUT}    3s
+
+*** Keyword ***
+Open Computer Database
+    [Documentation]    Open the desired URL in desired browser.
+    ...    Wait until the computers table is displayed.
+    Open Browser    ${URL}    ${BROWSER}
+    Maximize Browser Window
+    Wait Until Element Is Visible    ${XPATH_COMPUTERS_TABLE}
+
+Robust Click
+    [Arguments]    ${locator}    ${type}=element
+    [Documentation]    Waits for the presence of an element identified by ${locator} before clicking on the it.
+    ...    This keyword is more robust to unpredictable page loading times.
+    ...
+    ...    *Arguments*
+    ...
+    ...    - locator - locator of the element to be clicked.
+    ...    - type - a type of the element. Possible values: link, image, button, element (default).
+    ...
+    ...    *Example*
+    ...
+    ...    Robust Click | //input | button
+    Wait Until Page Contains Element    ${locator}    20s
+    Wait Until Element Is Visible    ${locator}    20s
+    Run Keyword If    '${type}'=='link'    Wait Until Keyword Succeeds    3s    1s    Click Link    ${locator}
+    Run Keyword If    '${type}'=='image'    Wait Until Keyword Succeeds    3s    1s    Click Image    ${locator}
+    Run Keyword If    '${type}'=='button'    Wait Until Element Is Enabled    ${locator}    3s
+    Run Keyword If    '${type}'=='button'    Wait Until Keyword Succeeds    3s    1s    Click Button    ${locator}
+    Run Keyword If    '${type}'=='element'    Wait Until Keyword Succeeds    3s    1s    Click Element    ${locator}
+
+Setup The Test
+    [Documentation]    General test setup procedure.
+    ...
+    ...    - Open the Computer database page.
+    ...    - Delete any computer with the default name if there is any.
+    Open Computer Database
+    Check That Computer Name Is Absent    ${DEFAULT_NAME}
+
+Robust Input Text
+    [Arguments]    ${locator}    ${text}
+    [Documentation]    Robust procedure to input text into element.
+    ...
+    ...    *Arguments*
+    ...
+    ...    - locator - locator of the element.
+    ...    - text - text to input.
+    ...
+    ...    *Example*
+    ...
+    ...    Robust Input Text | //input[@class='login'] | Administrator
+    Wait Until Page Contains Element    ${locator}    3s
+    Wait Until Element Is Visible    ${locator}    3s
+    Input Text    ${locator}    ${text}
+
+Check Page Contains Elements
+    [Arguments]    @{elements}
+    [Documentation]    Check that a number of elements are present on the page.
+    ...
+    ...    *Arguments*
+    ...
+    ...    - elements - list of the elements.
+    ...
+    ...    *Example*
+    ...
+    ...    \@{elements}= | Create List | //input | //button
+    ...
+    ...    Check Page Contains Elements | \@{elements}
+    : FOR    ${element}    IN    @{elements}
+    \    Wait Until Page Contains Element    ${element}

@@ -1,0 +1,72 @@
+*** Settings ***
+Documentation     The goal of this suite is to check validation of input fields on 'Add a computer' form.
+Test Setup        Open Computer Database
+Test Teardown     Close Browser
+Force Tags        Regression
+Library           Selenium2Library
+Resource          ../resources/utils.txt
+Resource          ../resources/main_page.txt
+Resource          ../resources/add_a_computer_page.txt
+
+*** Variable ***
+${DEFAULT_NAME}    AAK
+${LONG_NAME}      a1[|]~<--@/*$%^&#*/()?>,.*/\"'`|/\,;:&<>^*?«»àäåçèëìíîðñòôöыф♣☺♂^\M\r百科
+${INTRODUCED_DATE_1}    2016-12-0a
+${INTRODUCED_DATE_2}    2016-13-04
+${DISCONTINUED_DATE_1}    2016.12-04
+${DISCONTINUED_DATE_2}    2016-12-32
+
+*** Test Cases ***
+Default state of Add a computer form
+    [Documentation]    Open Add a computer form. Check that certain elements are displayed.
+    Go To Add A Computer Page
+    # Input fields
+    Check Page Contains Elements    ${XPATH_ADD_COMPUTER_NAME_INPUT}    ${XPATH_ADD_INTRODUCED_DATE_INPUT}    ${XPATH_ADD_DISCONTINUED_DATE_INPUT}
+    # Their hint labels
+    Check Page Contains Elements    ${XPATH_ADD_COMPUTER_NAME_LABEL}    ${XPATH_ADD_INTRODUCED_DATE_LABEL}    ${XPATH_ADD_DISCONTINUED_DATE_LABEL}
+    # Company name selector
+    Wait Until Page Contains Element    ${XPATH_ADD_COMPANY_SELECT}
+    # Buttons
+    Wait Until Element Is Enabled    ${XPATH_CREATE_THIS_COMPUTER_BUTTON}
+    Wait Until Element Is Enabled    ${XPATH_ADD_CANCEL_BUTTON}
+
+Computer name can contain any symbols
+    [Documentation]    Check that any not-whitespace symbols can be present in the computer name.
+    Add A Computer    ${LONG_NAME}
+
+Computer with whitespace-only name can not be added
+    [Documentation]    Check that computer with space symbol as a name can not be added.
+    Go To Add A Computer Page
+    Fill Computer Name Field - Add    ${SPACE}
+    Robust Click    ${XPATH_CREATE_THIS_COMPUTER_BUTTON}
+    Wait Until Page Contains Element    ${XPATH_ADD_A_COMPUTER_HEADING}
+    Wait Until Page Contains Element    ${XPATH_ADD_COMPUTER_NAME_ERROR}
+
+Invalid symbols in date fields
+    [Documentation]    Check that date fields accept only digits with hyphens
+    Go To Add A Computer Page
+    Fill Computer Name Field - Add    ${DEFAULT_NAME}
+    Fill Introduced Date Field - Add    ${INTRODUCED_DATE_1}
+    Fill Discontinued Date Field - Add    ${DISCONTINUED_DATE_1}
+    Robust Click    ${XPATH_CREATE_THIS_COMPUTER_BUTTON}
+    Wait Until Page Contains Element    ${XPATH_ADD_A_COMPUTER_HEADING}
+    Check Page Contains Elements    ${XPATH_ADD_INTRODUCED_DATE_ERROR}    ${XPATH_ADD_DISCONTINUED_DATE_ERROR}
+
+Invalid values for month and day
+    [Documentation]    Check that month and day date values have natural limitations
+    Go To Add A Computer Page
+    Fill Computer Name Field - Add    ${DEFAULT_NAME}
+    Fill Introduced Date Field - Add    ${INTRODUCED_DATE_2}
+    Fill Discontinued Date Field - Add    ${DISCONTINUED_DATE_2}
+    Robust Click    ${XPATH_CREATE_THIS_COMPUTER_BUTTON}
+    Wait Until Page Contains Element    ${XPATH_ADD_A_COMPUTER_HEADING}
+    Check Page Contains Elements    ${XPATH_ADD_INTRODUCED_DATE_ERROR}    ${XPATH_ADD_DISCONTINUED_DATE_ERROR}
+
+Cancelling adding the computer with valid data
+    [Documentation]    Check that date fields accept only digits with hyphens
+    [Setup]    Setup The Test
+    Go To Add A Computer Page
+    Fill Computer Name Field - Add    ${DEFAULT_NAME}
+    Robust Click    ${XPATH_ADD_CANCEL_BUTTON}
+    Filter    ${DEFAULT_NAME}
+    Wait Until Page Contains Element    ${XPATH_NO_COMPUTERS_FOUND}    ${FILTER_TIMEOUT}

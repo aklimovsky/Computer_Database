@@ -1,0 +1,51 @@
+*** Settings ***
+Documentation     The goal of this suite is to check functionality of creating a new computer.
+Test Setup        Setup The Test
+Test Teardown     Close Browser
+Force Tags        Regression
+Library           Selenium2Library
+Resource          ../resources/utils.txt
+Resource          ../resources/main_page.txt
+Resource          ../resources/add_a_computer_page.txt
+
+*** Variable ***
+${DEFAULT_NAME}    AAK
+${DEFAULT_INTRODUCED_DATE}    2010-12-04
+${DEFAULT_INTRODUCED_DATE_2}    04 Dec 2010
+${DEFAULT_DISCONTINUED_DATE}    2016-12-04
+${DEFAULT_DISCONTINUED_DATE_2}    04 Dec 2016
+${DEFAULT_COMPANY}    Apple Inc.
+
+*** Test Cases ***
+Add new computer with unique name
+    [Documentation]    Create a computer with unique name. Check that it is present in the computers list.
+    Add A Computer    ${DEFAULT_NAME}    ${EMPTY}    ${EMPTY}    ${EMPTY}
+    Filter    ${DEFAULT_NAME}
+    Wait Until Page Contains Element    ${XPATH_ONE_COMPUTER_FOUND}    ${FILTER_TIMEOUT}
+    Check First Computer Fields    AAK    ${EMPTY}    ${EMPTY}    ${EMPTY}
+
+Add new computer with all fields populated
+    [Documentation]    Create a computer with unique name. Fill all the fields.
+    ...    Check that it is present in the computers list and all the fields have correct values.
+    Add A Computer    ${DEFAULT_NAME}    ${DEFAULT_INTRODUCED_DATE}    ${DEFAULT_DISCONTINUED_DATE}    ${DEFAULT_COMPANY}
+    Filter    ${DEFAULT_NAME}
+    Wait Until Page Contains Element    ${XPATH_ONE_COMPUTER_FOUND}    ${FILTER_TIMEOUT}
+    Check First Computer Fields    AAK    ${DEFAULT_INTRODUCED_DATE_2}    ${DEFAULT_DISCONTINUED_DATE_2}    ${DEFAULT_COMPANY}
+
+Add new computer with existing Name
+    [Documentation]    Make sure that the computer with a certain name is present.
+    ...    Try to create a computer with the same name.
+    ...    Check that an appropriate error message is displayed and the second record is not created.
+    ...
+    ...    In my opinion two computers with the same name cannot exist together.
+    Add A Computer    ${DEFAULT_NAME}
+    Go To Add A Computer Page
+    Fill Computer Name Field - Add    ${DEFAULT_NAME}
+    Robust Click    ${XPATH_CREATE_THIS_COMPUTER_BUTTON}
+    # Here we expect the appropriate error message to appear, something like "Cannot create computer AAK as it is already present".
+    # As the current implementation allows creating two computers with identical names we cannot consider an exact xpath for that message.
+    # So that line is commented.
+    # Wait Until Page Contains Element    ${XPATH_ERROR_MESSAGE}
+    Robust Click    ${XPATH_ADD_CANCEL_BUTTON}
+    Filter    ${DEFAULT_NAME}
+    Wait Until Page Contains Element    ${XPATH_ONE_COMPUTER_FOUND}    ${FILTER_TIMEOUT}
